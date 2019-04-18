@@ -27,11 +27,12 @@ namespace MediatorPatternExample.Domain.Customer.Handler
             var customer = new CustomerEntity(request.Id, request.FirstName, request.LastName, request.Email, request.Phone);
             await _customerRepository.Save(customer);
 
-            await _mediator.Publish(new CustomerCreatedNotification
+            await _mediator.Publish(new CustomerActionNotification
             {
                 FirstName = request.FirstName,
                 LastName = request.LastName,
-                Email = request.Email
+                Email = request.Email,
+                Action = ActionNotification.Criado
             }, cancellationToken);
 
             return await Task.FromResult("Cliente registrado com sucesso");
@@ -42,11 +43,12 @@ namespace MediatorPatternExample.Domain.Customer.Handler
             var customer = new CustomerEntity(request.Id, request.FirstName, request.LastName, request.Email, request.Phone);
             await _customerRepository.Update(request.Id, customer);
 
-            await _mediator.Publish(new CustomerCreatedNotification
+            await _mediator.Publish(new CustomerActionNotification
             {
                 FirstName = request.FirstName,
                 LastName = request.LastName,
-                Email = request.Email
+                Email = request.Email,
+                Action = ActionNotification.Atualizado
             }, cancellationToken);
 
             return await Task.FromResult("Cliente atualizado com sucesso");
@@ -54,7 +56,17 @@ namespace MediatorPatternExample.Domain.Customer.Handler
 
         public async Task<string> Handle(CustomerDeleteCommand request, CancellationToken cancellationToken)
         {
+            var client = await _customerRepository.GetById(request.Id);
             await _customerRepository.Delete(request.Id);
+
+            await _mediator.Publish(new CustomerActionNotification
+            {
+                FirstName = client.FirstName,
+                LastName = client.LastName,
+                Email = client.Email,
+                Action = ActionNotification.Excluido
+            }, cancellationToken);
+
             return await Task.FromResult("Cliente excluido com sucesso");
         }
     }

@@ -49,7 +49,7 @@ namespace MediatorPatternExample.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetAll(int id)
+        public async Task<IActionResult> Get(int id)
         {
             var result = await _customerRepository.GetById(id);
             return Ok(result);
